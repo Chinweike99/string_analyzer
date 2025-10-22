@@ -21,10 +21,10 @@ export class StringAnalysisService {
 
         return {
             length,
-            is_palindrome: false,
-            unique_characters: 0,
-            word_count: 0,
-            sha256_hash: '',
+            is_palindrome,
+            unique_characters,
+            word_count,
+            sha256_hash,
             character_frequency_map,
         }
     }

@@ -35,7 +35,6 @@ export class StringAnalysisController {
   async analyzeString(@Body() analyzeStringDto: AnalyzeStringDto): Promise<AnalyzedString> {
     const { value } = analyzeStringDto;
 
-    // Validation
     if (typeof value !== 'string') {
       throw new UnprocessableEntityException('Value must be a string');
     }
@@ -56,75 +55,7 @@ export class StringAnalysisController {
     return this.stringAnalysisService.storeAnalyzedString(value, properties);
   }
 
-  @Get(':string_value')
-  getString(@Param('string_value') stringValue: string): AnalyzedString {
-    const analyzedString = this.stringAnalysisService.getAnalyzedStringByValue(stringValue);
-    
-    if (!analyzedString) {
-      throw new NotFoundException('String does not exist in the system');
-    }
-
-    return analyzedString;
-  }
-
-  @Get()
-  getAllStrings(@Query() filters: FilterStringsDto): StringsResponse {
-    let allStrings = this.stringAnalysisService.getAllAnalyzedStrings();
-    const appliedFilters: any = {};
-
-    // Apply filters
-    if (filters.is_palindrome !== undefined) {
-      const isPalindrome = filters.is_palindrome.toLowerCase() === 'true';
-      allStrings = allStrings.filter(str => str.properties.is_palindrome === isPalindrome);
-      appliedFilters.is_palindrome = isPalindrome;
-    }
-
-    if (filters.min_length !== undefined) {
-      const minLength = parseInt(filters.min_length);
-      if (isNaN(minLength)) {
-        throw new BadRequestException('min_length must be a valid integer');
-      }
-      allStrings = allStrings.filter(str => str.properties.length >= minLength);
-      appliedFilters.min_length = minLength;
-    }
-
-    if (filters.max_length !== undefined) {
-      const maxLength = parseInt(filters.max_length);
-      if (isNaN(maxLength)) {
-        throw new BadRequestException('max_length must be a valid integer');
-      }
-      allStrings = allStrings.filter(str => str.properties.length <= maxLength);
-      appliedFilters.max_length = maxLength;
-    }
-
-    if (filters.word_count !== undefined) {
-      const wordCount = parseInt(filters.word_count);
-      if (isNaN(wordCount)) {
-        throw new BadRequestException('word_count must be a valid integer');
-      }
-      allStrings = allStrings.filter(str => str.properties.word_count === wordCount);
-      appliedFilters.word_count = wordCount;
-    }
-
-    if (filters.contains_character !== undefined) {
-      if (filters.contains_character.length !== 1) {
-        throw new BadRequestException('contains_character must be a single character');
-      }
-      const searchChar = filters.contains_character.toLowerCase();
-      allStrings = allStrings.filter(str => 
-        str.properties.character_frequency_map[searchChar] !== undefined
-      );
-      appliedFilters.contains_character = searchChar;
-    }
-
-    return {
-      data: allStrings,
-      count: allStrings.length,
-      filters_applied: Object.keys(appliedFilters).length > 0 ? appliedFilters : undefined
-    };
-  }
-
-  @Get('filter-by-natural-language')
+    @Get('filter-by-natural-language')
   filterByNaturalLanguage(@Query() filterDto: NaturalLanguageFilterDto): NaturalLanguageResponse {
     const { query } = filterDto;
     const parsedFilters: any = {};
@@ -217,6 +148,75 @@ export class StringAnalysisController {
     } catch (error) {
       throw new BadRequestException('Unable to parse natural language query');
     }
+  }
+
+  @Get()
+  getAllStrings(@Query() filters: FilterStringsDto): StringsResponse {
+    let allStrings = this.stringAnalysisService.getAllAnalyzedStrings();
+    const appliedFilters: any = {};
+
+    // Apply filters
+    if (filters.is_palindrome !== undefined) {
+      const isPalindrome = filters.is_palindrome.toLowerCase() === 'true';
+      allStrings = allStrings.filter(str => str.properties.is_palindrome === isPalindrome);
+      appliedFilters.is_palindrome = isPalindrome;
+    }
+
+    if (filters.min_length !== undefined) {
+      const minLength = parseInt(filters.min_length);
+      if (isNaN(minLength)) {
+        throw new BadRequestException('min_length must be a valid integer');
+      }
+      allStrings = allStrings.filter(str => str.properties.length >= minLength);
+      appliedFilters.min_length = minLength;
+    }
+
+    if (filters.max_length !== undefined) {
+      const maxLength = parseInt(filters.max_length);
+      if (isNaN(maxLength)) {
+        throw new BadRequestException('max_length must be a valid integer');
+      }
+      allStrings = allStrings.filter(str => str.properties.length <= maxLength);
+      appliedFilters.max_length = maxLength;
+    }
+
+    if (filters.word_count !== undefined) {
+      const wordCount = parseInt(filters.word_count);
+      if (isNaN(wordCount)) {
+        throw new BadRequestException('word_count must be a valid integer');
+      }
+      allStrings = allStrings.filter(str => str.properties.word_count === wordCount);
+      appliedFilters.word_count = wordCount;
+    }
+
+    if (filters.contains_character !== undefined) {
+      if (filters.contains_character.length !== 1) {
+        throw new BadRequestException('contains_character must be a single character');
+      }
+      const searchChar = filters.contains_character.toLowerCase();
+      allStrings = allStrings.filter(str => 
+        str.properties.character_frequency_map[searchChar] !== undefined
+      );
+      appliedFilters.contains_character = searchChar;
+    }
+
+    return {
+      data: allStrings,
+      count: allStrings.length,
+      filters_applied: Object.keys(appliedFilters).length > 0 ? appliedFilters : undefined
+    };
+  }
+
+  
+  @Get(':string_value')
+  getString(@Param('string_value') stringValue: string): AnalyzedString {
+    const analyzedString = this.stringAnalysisService.getAnalyzedStringByValue(stringValue);
+    
+    if (!analyzedString) {
+      throw new NotFoundException('String does not exist in the system');
+    }
+
+    return analyzedString;
   }
 
   @Delete(':string_value')
