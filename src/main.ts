@@ -4,6 +4,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+    app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: false,
+  });
   
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -11,7 +17,11 @@ async function bootstrap() {
     transform: true,
   }));
   
-  await app.listen(process.env.PORT || 4000);
-  console.log(`server running on port ${4000}`)
+  const port = process.env.PORT || 4000;
+  
+  // IMPORTANT: Bind to 0.0.0.0 to accept external connections
+  await app.listen(port, '0.0.0.0');
+  
+  console.log(`Server running on port ${port}`);
 }
 bootstrap();
